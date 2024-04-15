@@ -3,9 +3,13 @@ package com.example.urlreader.utils
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.util.Log
 
 object AccessibilityUtils {
 
+    private val TAG = "AccessibilityUtils"
+
+    // check if User enabled Accessibility Permissions
     fun isAccessibilityPermissionOn(context: Context): Boolean {
         var accessEnabled = 0
         try {

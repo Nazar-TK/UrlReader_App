@@ -1,19 +1,13 @@
 package com.example.urlreader.presentation.RequestList
 
-import android.app.Application
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.urlreader.data.Request
 import com.example.urlreader.data.RequestRepository
-import com.example.urlreader.services.MyAccessibilityService
-import com.example.urlreader.utils.AccessibilityUtils
 import com.example.urlreader.utils.UiEvent
-import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
@@ -29,10 +23,10 @@ class RequestListViewModel @Inject constructor(
     private val _state = mutableStateOf(RequestListState())
     val state: State<RequestListState> = _state
 
-    private var getNumberJob: Job? = null
-
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
+
+    private var getNumberJob: Job? = null
 
     private var deletedRequest: Request? = null
 
@@ -69,7 +63,6 @@ class RequestListViewModel @Inject constructor(
         getNumberJob?.cancel()
         getNumberJob = repository.getRequests()
             .onEach { requests ->
-
                 _state.value = state.value.copy(
                     requestListItems = requests
                 )

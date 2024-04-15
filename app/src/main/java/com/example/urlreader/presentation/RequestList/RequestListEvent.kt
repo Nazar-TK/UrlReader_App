@@ -4,5 +4,5 @@ import com.example.urlreader.data.Request
 
 sealed class RequestListEvent {
     data class OnDeleteRequestClick(val request: Request): RequestListEvent()
-    object OnUndoDeleteClick: RequestListEvent()
+    data object OnUndoDeleteClick: RequestListEvent()
 }

@@ -8,6 +8,7 @@ import androidx.room.TypeConverters
     entities = [Request::class],
     version = 1
 )
+@TypeConverters(Converters::class)
 abstract class RequestDatabase: RoomDatabase() {
 
     abstract val dao: RequestDao

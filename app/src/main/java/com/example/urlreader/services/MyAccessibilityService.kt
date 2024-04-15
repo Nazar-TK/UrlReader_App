@@ -2,33 +2,35 @@ package com.example.urlreader.services
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
-import android.os.Build
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import com.example.urlreader.data.Request
 import com.example.urlreader.data.RequestRepository
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 
-class MyAccessibilityService() : AccessibilityService() {
+@AndroidEntryPoint
+class MyAccessibilityService : AccessibilityService() {
 
-    var text = ""
-    var browserApp = ""
-    var browserUrl = ""
+    private val TAG = "MyAccessibilityService"
+
+    private var text = "Nothing was typed."
+    private var browserApp = ""
+    private var browserUrl = ""
 
     @Inject
     lateinit var repository: RequestRepository
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     @SuppressLint("SimpleDateFormat")
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        val eventType: Int = event.eventType
-        when (eventType) {
+        when (event.eventType) {
+            // save user Request text
             AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> {
 
                 event.text.let{ text = it.toString()}
@@ -50,7 +52,7 @@ class MyAccessibilityService() : AccessibilityService() {
                     }
                 }
 
-                // If this is not a supported browser, exit
+                // If it is not a supported browser than exit
                 if (browserConfig == null) {
                     return
                 }
@@ -62,22 +64,22 @@ class MyAccessibilityService() : AccessibilityService() {
                     return
                 }
 
+                // Save only those requests, where url contains "google.com"
                 if (packageName != browserApp) {
-                    if (android.util.Patterns.WEB_URL.matcher(capturedUrl).matches()) {
-                        val sdf = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
-                        val currentDateTime = sdf.format(Date())
-                        Log.d("AccessibilityService", "$packageName  or $capturedUrl or ${text} or ${currentDateTime}")
+                    if (android.util.Patterns.WEB_URL.matcher(capturedUrl).matches() && capturedUrl.contains("google.com")) {
                         browserApp = packageName
                         browserUrl = capturedUrl
+                        // remove braces from text
+                        text = text.replace("[\\[\\]]".toRegex(), "")
+                        processRequestData(requestText = text, url = capturedUrl, LocalDateTime.now())
                     }
                 } else {
-                    if (capturedUrl != browserUrl) {
+                    if (capturedUrl != browserUrl && capturedUrl.contains("google.com")) {
                         if (android.util.Patterns.WEB_URL.matcher(capturedUrl).matches()) {
                             browserUrl = capturedUrl
-
-                            val sdf = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
-                            val currentDateTime = sdf.format(Date())
-                            Log.d("AccessibilityService", "$packageName  and $capturedUrl and ${text} and ${currentDateTime}")
+                            // remove braces from text
+                            text = text.replace("[\\[\\]]".toRegex(), "")
+                            processRequestData(requestText = text, url = capturedUrl, LocalDateTime.now())
                         }
                     }
                 }
@@ -85,37 +87,23 @@ class MyAccessibilityService() : AccessibilityService() {
         }
     }
 
-    private fun isBrowserPackage(packageName: String): Boolean {
-        return packageName.startsWith("com.android.chrome") ||
-                packageName.startsWith("org.mozilla.firefox") ||
-                packageName.startsWith("com.opera.browser") ||
-                packageName.startsWith("com.microsoft.emmx") ||
-                packageName.startsWith("com.brave.browser") ||
-                packageName.startsWith("com.duckduckgo.mobile.android")
-    }
 
-    private fun extractUrl(text: String): String? {
-        // Use regular expressions or other parsing techniques to extract the URL from the text
-        val urlRegex = "(?i)\\b((?:https?://|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\((?:[^\\s()<>]+|(?:\\([^\\s()<>]+\\)))?\\))+(?:\\((?:[^\\s()<>]+|(?:\\([^\\s()<>]+\\)))?\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))"
-        val matchResult = Regex(urlRegex).find(text)
-        return matchResult?.value
-    }
-
-    private fun processRequestData(requestText: String, url: String) {
+    private fun processRequestData(requestText: String, url: String, dateTime: LocalDateTime) {
         // Process or store the request text and URL as needed
-        Log.d("AccessibilityService", "Request Text: $requestText, URL: $url")
-//        coroutineScope.launch {
-//            try {
-//                repository.insertRequest(Request(requestBody = requestText, url = url))
-//            } catch (e: Exception) {
-//                Log.e("AccessibilityService", "Error saving request data", e)
-//            }
-//        }
+
+        coroutineScope.launch {
+            try {
+                repository.insertRequest(Request(requestBody = requestText, url = url, date = dateTime))
+                Log.d(TAG, "Saved $requestText and  $url and $dateTime")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving request data", e)
+            }
+        }
     }
 
     data class SupportedBrowserConfig(val packageName: String, val addressBarId: String)
 
-    fun getSupportedBrowsers(): List<SupportedBrowserConfig> {
+    private fun getSupportedBrowsers(): List<SupportedBrowserConfig> {
         val browsers = mutableListOf<SupportedBrowserConfig>()
         browsers.add(SupportedBrowserConfig("com.android.chrome", "com.android.chrome:id/url_bar"))
         browsers.add(SupportedBrowserConfig("org.mozilla.firefox", "org.mozilla.firefox:id/mozac_browser_toolbar_url_view"))
@@ -135,13 +123,6 @@ class MyAccessibilityService() : AccessibilityService() {
         val addressBarNodeInfo = nodes[0]
         val url = addressBarNodeInfo.text?.toString()
         return url
-    }
-
-
-    fun convertEventTimeToDateTime(eventTimeMillis: Long): String {
-        val eventDateTime = Date(eventTimeMillis)
-        val format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
-        return format.format(eventDateTime)
     }
 
     override fun onInterrupt() {

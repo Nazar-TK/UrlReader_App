@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">UrlReader</string>
+
+    <!-- List Item -->
+    <string name="time">Time: </string>
+    <string name="request_text">Request text: </string>
+    <string name="url">Url: </string>
+
 </resources>

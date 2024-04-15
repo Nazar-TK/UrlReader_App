@@ -18,9 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.urlreader.R
 import com.example.urlreader.data.Request
 
 @Composable
@@ -51,13 +53,19 @@ fun RequestListItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = request.requestBody ?: "",
+                    text = stringResource(R.string.time) + request.createdDateFormatted,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.request_text) + request.requestBody,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Medium,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = request.url ?: "",
+                    text = stringResource(R.string.url) + request.url,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )

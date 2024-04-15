@@ -14,6 +14,6 @@ interface RequestDao {
     suspend fun insertRequest(request: Request)
     @Delete
     suspend fun deleteRequest(request: Request)
-    @Query("SELECT * FROM request")
+    @Query("SELECT * FROM request ORDER BY date DESC")
     fun getRequests() : Flow<List<Request>>
 }

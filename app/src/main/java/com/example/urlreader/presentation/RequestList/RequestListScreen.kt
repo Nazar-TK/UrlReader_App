@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,10 +43,13 @@ fun RequestListScreen(
         viewModel.uiEvent.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackBar -> {
-                    snackbarHostState.showSnackbar(
+                    val result = snackbarHostState.showSnackbar(
                         message = event.message,
                         actionLabel = event.action
                     )
+                    if(result == SnackbarResult.ActionPerformed) {
+                        viewModel.onEvent(RequestListEvent.OnUndoDeleteClick)
+                    }
                 }
             }
         }
