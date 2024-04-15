@@ -1,4 +1,4 @@
-package com.example.urlreader.ui.theme
+package com.example.urlreader.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

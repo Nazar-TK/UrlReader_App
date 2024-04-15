@@ -1,4 +1,4 @@
-package com.example.urlreader
+package com.example.urlreader.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,11 +10,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.urlreader.ui.theme.UrlReaderTheme
+import com.example.urlreader.presentation.RequestList.RequestListScreen
+import com.example.urlreader.presentation.ui.theme.UrlReaderTheme
+import com.example.urlreader.utils.AccessibilityUtils
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!AccessibilityUtils.isAccessibilityPermissionOn(this)) {
+            AccessibilityUtils.openAccessibilitySettings(this)
+        }
+
         setContent {
             UrlReaderTheme {
                 // A surface container using the 'background' color from the theme
@@ -22,25 +31,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    RequestListScreen()
                 }
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    UrlReaderTheme {
-        Greeting("Android")
+    override fun onResume() {
+        super.onResume()
+        if (!AccessibilityUtils.isAccessibilityPermissionOn(this)) {
+            AccessibilityUtils.openAccessibilitySettings(this)
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.urlreader.ui.theme
+package com.example.urlreader.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build

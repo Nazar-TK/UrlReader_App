@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:packageNames="com.android.chrome,org.mozilla.firefox,com.opera.browser,com.microsoft.emmx,com.brave.browser,com.duckduckgo.mobile.android"
+    android:accessibilityEventTypes = "typeViewTextChanged|typeViewTextSelectionChanged|typeWindowsChanged|typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagRequestTouchExplorationMode|flagRequestEnhancedWebAccessibility|flagReportViewIds|flagRetrieveInteractiveWindows"
+    android:accessibilityFeedbackType="feedbackVisual"
+    android:notificationTimeout="300"
+    android:canRetrieveWindowContent="true"
+    />
